@@ -47,7 +47,7 @@ services:
         fromService:
           name: quiz-app-backend
           type: web
-          property: url
+          property: host
 
 databases:
   - name: quiz-app-db
