@@ -51,4 +51,4 @@ services:
 
 databases:
   - name: quiz-app-db
-    plan: starter 
+    plan: free 
