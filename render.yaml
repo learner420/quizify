@@ -3,7 +3,7 @@ services:
   - type: web
     name: quiz-app-backend
     env: python
-    plan: free
+    plan: starter
     buildCommand: cd backend && pip install -r requirements.txt
     startCommand: cd backend && gunicorn --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:$PORT run:app
     envVars:
@@ -35,7 +35,7 @@ services:
   - type: web
     name: quiz-app-frontend
     env: static
-    plan: free
+    plan: starter
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/build
     routes:
@@ -51,4 +51,4 @@ services:
 
 databases:
   - name: quiz-app-db
-    plan: free 
+    plan: starter 
