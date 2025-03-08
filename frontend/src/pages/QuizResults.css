@@ -1,0 +1,96 @@
+/* Quiz Results Styles */
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  cursor: default;
+  transition: all 0.2s ease;
+}
+
+.option-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  margin-right: 15px;
+  font-weight: bold;
+}
+
+.option-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Correct answer styling */
+.correct-answer {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-color: #28a745;
+}
+
+.correct-answer .option-letter {
+  background-color: #28a745;
+  color: white;
+}
+
+.correct-icon {
+  color: #28a745;
+}
+
+/* Incorrect answer styling */
+.incorrect-answer {
+  background-color: rgba(220, 53, 69, 0.1);
+  border-color: #dc3545;
+}
+
+.incorrect-answer .option-letter {
+  background-color: #dc3545;
+  color: white;
+}
+
+.incorrect-icon {
+  color: #dc3545;
+}
+
+/* Explanation section */
+.explanation {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border-left: 4px solid #007bff;
+}
+
+.user-answer-summary {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .option-btn {
+    padding: 8px 12px;
+  }
+  
+  .option-letter {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+    font-size: 0.9rem;
+  }
+} 

@@ -1,0 +1,110 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.quiz-card {
+  margin-bottom: 20px;
+  transition: transform 0.3s;
+}
+
+.quiz-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.token-badge {
+  background-color: #6f42c1;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.question-container {
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.option-btn {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.option-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.option-btn.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.option-btn.correct {
+  background-color: #28a745;
+  color: white;
+}
+
+.option-btn.incorrect {
+  background-color: #dc3545;
+  color: white;
+}
+
+.explanation {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #17a2b8;
+  border-radius: 4px;
+}
+
+.ai-form {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.payment-card {
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+
+.payment-card:hover {
+  border-color: #007bff;
+  transform: scale(1.02);
+}
+
+.payment-card.selected {
+  border-color: #007bff;
+  background-color: #f8f9ff;
+}
+
+.auth-container {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+} 

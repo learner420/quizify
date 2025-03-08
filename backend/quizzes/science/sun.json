@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "What is the primary element in the Sun's composition?",
+    "options": [
+      "Hydrogen",
+      "Helium",
+      "Oxygen",
+      "Carbon"
+    ],
+    "correct_answer": "Hydrogen",
+    "explanation": "The Sun is primarily composed of hydrogen, which accounts for about 75% of its mass and fuels nuclear fusion in its core."
+  },
+  {
+    "id": 2,
+    "question": "What process generates energy in the Sun?",
+    "options": [
+      "Nuclear fusion",
+      "Nuclear fission",
+      "Combustion",
+      "Radioactive decay"
+    ],
+    "correct_answer": "Nuclear fusion",
+    "explanation": "The Sun produces energy through nuclear fusion, where hydrogen atoms combine under high pressure and temperature to form helium."
+  },
+  {
+    "id": 3,
+    "question": "Approximately what is the temperature at the Sun's core?",
+    "options": [
+      "1 million \u00b0C",
+      "5 million \u00b0C",
+      "15 million \u00b0C",
+      "100 million \u00b0C"
+    ],
+    "correct_answer": "15 million \u00b0C",
+    "explanation": "The Sun's core reaches temperatures around 15 million \u00b0C, enabling the extreme conditions required for nuclear fusion."
+  },
+  {
+    "id": 4,
+    "question": "What causes solar wind?",
+    "options": [
+      "Eruptions from sunspots",
+      "Disturbances in the Sun's magnetic field",
+      "Charged particles escaping the Sun's gravity",
+      "Radiation from solar flares"
+    ],
+    "correct_answer": "Charged particles escaping the Sun's gravity",
+    "explanation": "Solar wind consists of charged particles (mostly electrons and protons) that stream outward from the Sun's corona due to high thermal energy overcoming gravity."
+  },
+  {
+    "id": 5,
+    "question": "In which part of the Milky Way galaxy is the Sun located?",
+    "options": [
+      "The galactic center",
+      "The Orion Arm",
+      "The galactic halo",
+      "The Perseus Arm"
+    ],
+    "correct_answer": "The Orion Arm",
+    "explanation": "The Sun resides in the Orion Arm, a minor spiral arm of the Milky Way galaxy, approximately 26,000 light-years from the galactic center."
+  }
+]

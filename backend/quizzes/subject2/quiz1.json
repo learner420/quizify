@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "question": "Which programming language is known for its use in web development with its frameworks like React and Angular?",
+    "options": ["Python", "JavaScript", "Java", "C++"],
+    "correct_answer": "JavaScript",
+    "explanation": "JavaScript is the primary language for web development, with popular frameworks like React, Angular, and Vue.js."
+  },
+  {
+    "id": 2,
+    "question": "What does SQL stand for?",
+    "options": ["Structured Query Language", "Simple Query Language", "Standard Query Language", "Sequential Query Language"],
+    "correct_answer": "Structured Query Language",
+    "explanation": "SQL (Structured Query Language) is used for managing and manipulating relational databases."
+  },
+  {
+    "id": 3,
+    "question": "Which data structure operates on a Last-In-First-Out (LIFO) principle?",
+    "options": ["Queue", "Stack", "Linked List", "Tree"],
+    "correct_answer": "Stack",
+    "explanation": "A stack follows the Last-In-First-Out (LIFO) principle, where the last element added is the first one to be removed."
+  },
+  {
+    "id": 4,
+    "question": "What is the time complexity of binary search?",
+    "options": ["O(n)", "O(n²)", "O(log n)", "O(n log n)"],
+    "correct_answer": "O(log n)",
+    "explanation": "Binary search has a time complexity of O(log n) because it divides the search interval in half with each step."
+  },
+  {
+    "id": 5,
+    "question": "Which of the following is NOT a RESTful API method?",
+    "options": ["GET", "POST", "DELETE", "FETCH"],
+    "correct_answer": "FETCH",
+    "explanation": "FETCH is not a standard RESTful API method. The standard methods are GET, POST, PUT, PATCH, and DELETE."
+  }
+] 

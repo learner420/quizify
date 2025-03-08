@@ -1,0 +1,182 @@
+[
+    {
+        "id": 1,
+        "question": "According to Walter's Model, when should a firm adopt a 100% dividend payout ratio?",
+        "options": [
+            "When the cost of equity (ke) equals the internal rate of return (r)",
+            "When the cost of equity (ke) is less than the internal rate of return (r)",
+            "When the cost of equity (ke) is greater than the internal rate of return (r)",
+            "When the cost of equity (ke) is zero"
+        ],
+        "correct_answer": "When the cost of equity (ke) is greater than the internal rate of return (r)",
+        "explanation": "Walter's model suggests a 100% payout when ke > r.  This is because if the shareholders' required return (ke) is *higher* than the firm's return on investment (r), the shareholders are better off receiving the earnings as dividends and investing them elsewhere at their higher required rate. The firm cannot generate returns as high as shareholders can on their own."
+    },
+    {
+        "id": 2,
+        "question": "If a firm's cost of equity (ke) is greater than its internal rate of return (r), what does Walter's Model recommend regarding dividend payout?",
+        "options": [
+            "0% payout",
+            "100% payout",
+            "50% payout",
+            "25% payout"
+        ],
+        "correct_answer": "100% payout",
+        "explanation": "When ke > r, the company is not earning as much on its investments as shareholders require.  Walter's model indicates that, in this situation, it's best to distribute *all* earnings as dividends, allowing shareholders to reinvest the funds at their higher required rate of return."
+    },
+    {
+        "id": 3,
+        "question": "Does Walter's Model suggest that a firm can *always* increase the value of its shares by manipulating dividend policy?",
+        "options": [
+            "By increasing dividends",
+            "By decreasing dividends",
+            "By keeping dividends constant",
+            "None of the above"
+        ],
+        "correct_answer": "None of the above",
+        "explanation": "Walter's model DOES suggest an optimal dividend policy *based on the relationship between ke and r*, but it doesn't imply a firm can *always* increase share value simply by changing dividends.  The optimal policy depends on whether ke > r, ke < r, or ke = r.  The value is maximized by choosing the *correct* payout, not just any arbitrary change."
+    },
+    {
+        "id": 4,
+        "question": "Which financial model is associated with the 'bird-in-hand' argument regarding dividends?",
+        "options": [
+            "Walter's Model",
+            "Gordon's Model",
+            "Modigliani-Miller (MM) Model",
+            "Residuals Theory"
+        ],
+        "correct_answer": "Gordon's Model",
+        "explanation": "The 'bird-in-hand' argument, attributed to Myron Gordon, posits that investors prefer the certainty of current dividends over the potential for future capital gains, which are considered riskier.  This is because a dividend received today is certain (a bird in the hand), while future capital gains are uncertain (worth two in the bush)."
+    },
+    {
+        "id": 5,
+        "question": "According to the Residuals Theory, how should dividends be viewed?",
+        "options": [
+            "A relevant decision",
+            "An active decision",
+            "A passive decision",
+            "An irrelevant decision"
+        ],
+        "correct_answer": "A passive decision",
+        "explanation": "The Residuals Theory states that dividends are a *passive* result of the firm's investment decisions.  The firm should first identify and invest in all profitable projects.  Only the 'residual' earnings, those left over *after* all investment opportunities are exhausted, should be paid out as dividends.  The dividend decision is thus secondary and passive."
+    },
+    {
+        "id": 6,
+        "question": "The dividend irrelevance argument of the Modigliani-Miller (MM) Model relies on which concept?",
+        "options": [
+            "Issue of Debentures",
+            "Issue of Bonus Shares",
+            "Arbitrage",
+            "Hedging"
+        ],
+        "correct_answer": "Arbitrage",
+        "explanation": "MM's dividend irrelevance proposition hinges on the idea of *arbitrage*.  In a perfect capital market (MM's assumption), if two identical companies have different dividend policies, investors can create 'homemade dividends' through buying or selling shares to offset any differences. This arbitrage process ensures that dividend policy doesn't affect firm value."
+    },
+    {
+        "id": 7,
+        "question": "Which of the following statements is INCORRECT concerning the Modigliani-Miller (MM) Model?",
+        "options": [
+            "Share price goes up if a dividend is paid",
+            "Share price goes down if a dividend is not paid",
+            "Market value is unaffected by dividend policy",
+              "All the options have incorrect statements within them"
+        ],
+        "correct_answer": "All the options have incorrect statements within them",
+        "explanation": "Statements a and b are incorrect. The MM model, under its assumptions, argues that dividend policy is *irrelevant*.  Paying a dividend causes the share price to drop by approximately the amount of the dividend, leaving the investor's total wealth (dividend + share value) unchanged. Statement 'c' is a correct representation of the MM model, options a + b are not."
+    },
+    {
+        "id": 8,
+        "question": "Which model emphasizes investors' preference for current dividends over potential future capital gains?",
+        "options": [
+            "Walter's Model",
+            "Residuals Theory",
+            "Gordon's Model",
+            "Modigliani-Miller (MM) Model"
+        ],
+        "correct_answer": "Gordon's Model",
+        "explanation": "Gordon's Model explicitly incorporates the 'bird-in-hand' fallacy, suggesting investors prefer the certainty of current dividends and will discount future capital gains more heavily due to their perceived risk."
+    },
+    {
+        "id": 9,
+        "question": "The Modigliani-Miller (MM) Model's argument for dividend irrelevance utilizes arbitrage between which two factors?",
+        "options": [
+            "Dividend and Bonus",
+            "Dividend and Capital Issue (New Equity)",
+            "Profit and Investment",
+            "None of the above"
+        ],
+        "correct_answer": "Dividend and Capital Issue (New Equity)",
+        "explanation": "MM's arbitrage argument works because investors can replicate the effect of a dividend (or lack thereof) by selling shares (to create a 'homemade dividend') or buying shares (if dividends are not paid and they want a cash flow).  This process involves the issuance or repurchase of equity (capital issue)."
+    },
+    {
+        "id": 10,
+        "question": "Under Walter's Model, if the cost of equity (ke) equals the internal rate of return (r), which of the following becomes irrelevant?",
+        "options": [
+            "Earnings per share (EPS)",
+            "Dividend per share (DPS)",
+            "Dividend Payout (DP) Ratio",
+            "None of the above"
+        ],
+        "correct_answer": "Dividend Payout (DP) Ratio",
+        "explanation": "When ke = r, the firm's investments earn exactly the return shareholders require.  Therefore, it doesn't matter whether earnings are retained or paid out; the value of the firm will be the same regardless of the dividend payout ratio.  The DP ratio is irrelevant in this specific scenario."
+    },
+    {
+        "id": 11,
+        "question": "Why does the Modigliani-Miller (MM) Model argue that dividends are irrelevant?",
+        "options": [
+            "The value of the firm depends on its earning power (and investment policy)",
+            "Investors buy shares primarily for capital gains",
+            "Dividends are paid only after determining retained earnings",
+            "Dividends are typically a small amount"
+        ],
+        "correct_answer": "The value of the firm depends on its earning power (and investment policy)",
+        "explanation": "The core of MM's argument is that the firm's value is determined by its *investment decisions* and the resulting earning power, *not* by how those earnings are divided between dividends and retained earnings. In a perfect market, dividend policy is simply a financing decision, not a value-creating one."
+    },
+    {
+        "id": 12,
+        "question": "Which of the following describes a passive dividend policy?",
+        "options": [
+            "Dividends are paid as a fixed percentage of earnings per share (EPS)",
+            "Dividends are paid as a constant amount per share",
+            "Dividends are paid only from earnings remaining after funding all profitable investment projects",
+            "All of the above"
+        ],
+        "correct_answer": "Dividends are paid only from earnings remaining after funding all profitable investment projects",
+        "explanation": "A passive dividend policy, as described by the Residuals Theory, prioritizes investment. Dividends are a byproduct, a 'residual,' paid out only if there are funds left over after all positive-NPV projects have been undertaken."
+    },
+    {
+        "id": 13,
+        "question": "In Gordon's Model, what does a zero market price (MP) for a zero payout ratio imply?",
+        "options": [
+            "Shares are not being traded",
+            "Shares are available free of cost",
+            "Investors believe the company is not retaining earnings wisely (they are being wasted)",
+            "None of the above"
+        ],
+        "correct_answer": "Investors believe the company is not retaining earnings wisely (they are being wasted)",
+        "explanation": "While technically if investors are not ready to pay this would also cause this, the root cause is the belief. If the payout is zero, and the market price is also zero, it implies investors place no value on the firm's retained earnings. This is a *critical* aspect of Gordon's model: if dividends are zero *and* the firm's investments don't generate sufficient returns (or investors *believe* they won't), the stock has no value."
+    },
+    {
+        "id": 14,
+        "question": "Gordon's Model of dividend relevance is essentially the same as which equity valuation model?",
+        "options": [
+            "No-growth model of equity valuation",
+            "Constant growth model of equity valuation",
+            "Price-Earnings Ratio",
+            "Inverse of Price-Earnings Ratio"
+        ],
+        "correct_answer": "Constant growth model of equity valuation",
+        "explanation": "Gordon's Dividend Discount Model is mathematically equivalent to the constant growth model (also known as the Gordon Growth Model). It calculates the intrinsic value of a stock based on the present value of its expected future dividends, assuming a constant dividend growth rate."
+    },
+    {
+        "id": 15,
+        "question": "If the internal rate of return (r) equals the cost of equity (ke), how will the market price (MP) calculated by Walter's Model and Gordon's Model compare for different payout ratios?",
+        "options": [
+            "Unequal",
+            "Zero",
+            "Equal",
+            "Negative"
+        ],
+        "correct_answer": "Equal",
+        "explanation": "When r = ke, both Walter's and Gordon's models will produce the *same* market price, regardless of the dividend payout ratio. This is because the reinvestment rate of retained earnings is equal to the shareholders' required rate of return, making the dividend policy irrelevant to the firm's value in this specific case."
+    }
+]

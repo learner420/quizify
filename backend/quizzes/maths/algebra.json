@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "What are the eigenvalues of the matrix [[3, 4], [2, 1]]?",
+    "options": [
+      "5 and -1",
+      "2 and 4",
+      "3 and 1",
+      "0 and 6"
+    ],
+    "correct_answer": "5 and -1",
+    "explanation": "The characteristic equation is det([[3-\u03bb, 4], [2, 1-\u03bb]]) = (3-\u03bb)(1-\u03bb) - 8 = \u03bb\u00b2 - 4\u03bb - 5 = 0. Solving gives eigenvalues \u03bb = 5 and \u03bb = -1."
+  },
+  {
+    "id": 2,
+    "question": "What is the modulus of the complex number (3 + 4i)/(1 - 2i)?",
+    "options": [
+      "\u221a5",
+      "5",
+      "\u221a13",
+      "1"
+    ],
+    "correct_answer": "\u221a5",
+    "explanation": "Multiply numerator and denominator by the conjugate (1 + 2i): (3+4i)(1+2i) = -5 + 10i. Divide by 1\u00b2 + (2)\u00b2 = 5. Result is -1 + 2i. Modulus: \u221a((-1)\u00b2 + 2\u00b2) = \u221a5."
+  },
+  {
+    "id": 3,
+    "question": "Solve for x: log\u2082(x - 3) + log\u2082(x + 1) = 3.",
+    "options": [
+      "1 + 2\u221a3",
+      "4",
+      "5",
+      "1 - 2\u221a3"
+    ],
+    "correct_answer": "1 + 2\u221a3",
+    "explanation": "Combine logs: log\u2082[(x-3)(x+1)] = 3 \u21d2 (x-3)(x+1) = 8 \u21d2 x\u00b2 - 2x - 11 = 0. Quadratic formula gives x = [2 \u00b1 \u221a(4 + 44)]/2 = 1 \u00b1 2\u221a3. Only 1 + 2\u221a3 satisfies x > 3."
+  },
+  {
+    "id": 4,
+    "question": "If the inverse of matrix [[2, a], [3, 4]] is (1/2)[[4, -a], [-3, 2]], what is the value of a?",
+    "options": [
+      "2",
+      "1",
+      "3",
+      "-2"
+    ],
+    "correct_answer": "2",
+    "explanation": "Multiply A and its inverse to get the identity matrix. For the (1,1) entry: (2)(4/2) + (a)(-3/2) = 1 \u21d2 4 - (3a)/2 = 1 \u21d2 3a = 6 \u21d2 a = 2."
+  },
+  {
+    "id": 5,
+    "question": "Solve the system: 3x + y - z = 5; x - 2y + 2z = -3; 4x + 3y + z = 10.",
+    "options": [
+      "(1, 2, 0)",
+      "(2, 1, 3)",
+      "(0, 1, 2)",
+      "(-1, 4, 1)"
+    ],
+    "correct_answer": "(1, 2, 0)",
+    "explanation": "Substitute z from the first equation into the second, solve for x = 1. Substitute x = 1 into other equations to find y = 2 and z = 0. Verify all equations hold."
+  }
+]

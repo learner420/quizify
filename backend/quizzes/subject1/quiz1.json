@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "question": "What is the capital of France?",
+    "options": ["Paris", "London", "Rome", "Berlin"],
+    "correct_answer": "Paris",
+    "explanation": "Paris is the capital and largest city of France."
+  },
+  {
+    "id": 2,
+    "question": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+    "correct_answer": "Mars",
+    "explanation": "Mars is called the Red Planet because of the reddish appearance given by iron oxide (rust) on its surface."
+  },
+  {
+    "id": 3,
+    "question": "What is the chemical symbol for gold?",
+    "options": ["Go", "Gd", "Au", "Ag"],
+    "correct_answer": "Au",
+    "explanation": "The chemical symbol Au comes from the Latin word for gold, 'aurum'."
+  },
+  {
+    "id": 4,
+    "question": "Which famous scientist developed the theory of relativity?",
+    "options": ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Nikola Tesla"],
+    "correct_answer": "Albert Einstein",
+    "explanation": "Albert Einstein published his theory of relativity in 1905 (special relativity) and 1915 (general relativity)."
+  },
+  {
+    "id": 5,
+    "question": "What is the largest ocean on Earth?",
+    "options": ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+    "correct_answer": "Pacific Ocean",
+    "explanation": "The Pacific Ocean is the largest and deepest ocean on Earth, covering more than 30% of the Earth's surface."
+  }
+] 
