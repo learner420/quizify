@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# This script helps deploy the quiz app to Render
+# This script helps deploy the quiz app to Render with Gunicorn
 
-echo "Quiz App Deployment to Render"
-echo "============================"
+echo "Quiz App Deployment to Render with Gunicorn"
+echo "=========================================="
 echo ""
-echo "This script will guide you through deploying your Quiz App to Render's free tier."
+echo "This script will guide you through deploying your Quiz App to Render's free tier using Gunicorn."
 echo ""
 
 # Check if git is installed
@@ -52,7 +52,7 @@ if [ "$already_pushed" != "y" ]; then
 fi
 
 echo ""
-echo "Now let's deploy to Render:"
+echo "Now let's deploy to Render with Gunicorn:"
 echo "1. Go to https://dashboard.render.com/blueprints"
 echo "2. Click 'New Blueprint Instance'"
 echo "3. Connect your GitHub account if you haven't already"
@@ -61,8 +61,13 @@ echo "5. Click 'Apply Blueprint'"
 echo ""
 echo "Render will automatically deploy your:"
 echo "- PostgreSQL database (free tier)"
-echo "- Backend web service (free tier)"
+echo "- Backend web service with Gunicorn (free tier)"
 echo "- Frontend static site (free tier)"
+echo ""
+echo "Your app is configured with optimized Gunicorn settings:"
+echo "- 2 workers: Good balance for free tier resources"
+echo "- 4 threads per worker: Handles more concurrent requests"
+echo "- gthread worker class: Better performance for web apps"
 echo ""
 echo "Don't forget to set up these environment variables when prompted:"
 echo "- RAZORPAY_KEY_ID"
@@ -70,7 +75,7 @@ echo "- RAZORPAY_KEY_SECRET"
 echo "- SMTP_USERNAME (for password reset emails)"
 echo "- SMTP_PASSWORD"
 echo ""
-echo "For more details, see RENDER_DEPLOYMENT.md"
+echo "For more details, see RENDER_GUNICORN_DEPLOYMENT.md"
 
 # Open Render dashboard in browser if possible
 if command -v xdg-open &> /dev/null; then

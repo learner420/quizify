@@ -36,13 +36,27 @@ Use the provided `upload_to_github.sh` (Linux/Mac) or `upload_to_github.bat` (Wi
    - Click "Apply" to start the deployment
    - Render will automatically create:
      - A PostgreSQL database (free tier)
-     - A backend web service (free tier)
+     - A backend web service with Gunicorn (free tier)
      - A frontend static site (free tier)
 
 5. **Access Your Application**:
    - Once deployment is complete, you can access your application using the URL provided by Render
    - The frontend will be available at the main URL
    - The backend API will be available at the URL of the backend service
+
+## Gunicorn Configuration
+
+The backend is configured to use Gunicorn with optimized settings for Render's free tier:
+
+```
+gunicorn --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:$PORT run:app
+```
+
+- **2 workers**: Balances performance with memory usage on the free tier
+- **4 threads per worker**: Handles more concurrent requests
+- **gthread worker class**: Better performance for web applications
+
+For more detailed information about the Gunicorn deployment, see the `RENDER_GUNICORN_DEPLOYMENT.md` file.
 
 ## Free Tier Limitations
 

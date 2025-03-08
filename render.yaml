@@ -5,7 +5,7 @@ services:
     env: python
     plan: free
     buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT run:app
+    startCommand: cd backend && gunicorn --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:$PORT run:app
     envVars:
       - key: FLASK_ENV
         value: production
