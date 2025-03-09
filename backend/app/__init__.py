@@ -13,8 +13,13 @@ def create_app():
     app = Flask(__name__)
     
     # Configure app
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-testing')
-    
+    # app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-testing')
+    mysql_user = 'YOUR_USERNAME'
+    mysql_password = 'YOUR_MYSQL_PASSWORD'
+    mysql_host = 'YOUR_USERNAME.mysql.pythonanywhere-services.com'
+    mysql_database = 'YOUR_USERNAME$default'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}' 
+
     # Database configuration
     # Check if DATABASE_URL is provided (for Render/Heroku)
     if os.environ.get('DATABASE_URL'):
