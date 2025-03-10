@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Badge, Alert, ProgressBar } from 'react-bootstrap';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 import './QuizResults.css'; // We'll create this CSS file next
 
 const QuizResults = () => {
@@ -29,118 +29,32 @@ const QuizResults = () => {
       try {
         setLoading(true);
         setError('');
+        console.log('Fetching quiz results from:', API_URL);
         
-        // Get the most recent attempt for this quiz
-        const attemptsResponse = await axios.get('/api/quizzes/attempts');
-        const attempts = attemptsResponse.data.attempts;
-        
-        let quizAttempt;
-        
+        // Build the URL with appropriate parameters
+        let endpoint = `/api/quizzes/${subject}/${quizName}/results`;
         if (attemptId) {
-          // If we have an attempt ID, find that specific attempt
-          quizAttempt = attempts.find(
-            attempt => attempt.id === parseInt(attemptId, 10)
-          );
-        } else {
-          // Otherwise, find the most recent attempt for this quiz
-          quizAttempt = attempts.find(
-            attempt => attempt.subject === subject && attempt.quiz_name === quizName
-          );
+          endpoint += `?attempt_id=${attemptId}`;
         }
         
-        if (!quizAttempt) {
-          throw new Error('Quiz attempt not found');
-        }
+        const resultsData = await apiCall(endpoint);
+        setResults(resultsData);
         
-        // Store the attempt ID for future use
-        setAttemptId(quizAttempt.id);
-        
-        console.log("Found quiz attempt:", quizAttempt);
-        
-        // Get user answers from the attempt record
-        if (quizAttempt.user_answers && quizAttempt.user_answers.length > 0) {
-          console.log("Using user answers from attempt record:", quizAttempt.user_answers);
-          setUserAnswers(quizAttempt.user_answers);
-        } else {
-          console.log("No user answers found in attempt record");
-          
-          // Try to get saved answers from localStorage as a fallback
-          const savedAnswersKey = `quiz_${subject}_${quizName}_${quizAttempt.id}_answers`;
-          const savedAnswers = localStorage.getItem(savedAnswersKey);
-          
-          if (savedAnswers) {
-            console.log("Found saved answers in localStorage");
-            setUserAnswers(JSON.parse(savedAnswers));
-          } else {
-            console.log("No saved answers found in localStorage");
-          }
-        }
-        
-        // Submit the quiz again to get the results
-        // This is a workaround since we don't store the detailed results in the database
-        try {
-          // Include attempt_id in the request if we have one
-          const url = `/api/quizzes/${subject}/${quizName}?attempt_id=${quizAttempt.id}`;
-            
-          const quizResponse = await axios.get(url);
-          const quiz = quizResponse.data;
-          
-          // Use the user answers from the attempt record or localStorage
-          const answersToSubmit = userAnswers.length > 0 ? userAnswers : new Array(quiz.questions.length).fill('');
-          
-          // Submit the quiz with the user's answers to get the correct answers
-          const submitPayload = {
-            answers: answersToSubmit,
-            attempt_id: quizAttempt.id,
-            preserve_score: true // Add a flag to preserve the existing score
-          };
-          
-          const submitResponse = await axios.post(`/api/quizzes/${subject}/${quizName}/submit`, submitPayload);
-          
-          // Make sure results is defined
-          const quizResults = submitResponse.data.results || [];
-          
-          // If we got user answers from the response, update our state
-          if (submitResponse.data.user_answers && submitResponse.data.user_answers.length > 0) {
-            console.log("Using user answers from submit response:", submitResponse.data.user_answers);
-            setUserAnswers(submitResponse.data.user_answers);
-          }
-          
-          // Use the actual score from the attempt record, not from the submit response
-          // This ensures we don't overwrite the actual score
-          const finalResults = {
-            score: quizAttempt.score,
-            totalQuestions: quizAttempt.total_questions,
-            percentage: quizAttempt.percentage,
-            results: quizResults,
-            attempt_id: quizAttempt.id,
-            user_answers: submitResponse.data.user_answers || userAnswers
-          };
-          
-          console.log("Setting final results:", finalResults);
-          setResults(finalResults);
-        } catch (submitErr) {
-          console.error('Error getting quiz details:', submitErr);
-          
-          // Fallback to just showing the score without details
-          setResults({
-            score: quizAttempt.score,
-            totalQuestions: quizAttempt.total_questions,
-            percentage: quizAttempt.percentage,
-            results: [], // Ensure results is an empty array, not undefined
-            attempt_id: quizAttempt.id,
-            user_answers: userAnswers
-          });
+        // Set user answers if available
+        if (resultsData.user_answers) {
+          setUserAnswers(resultsData.user_answers);
         }
       } catch (err) {
-        setError('Failed to load quiz results: ' + (err.message || 'Unknown error'));
-        console.error(err);
+        console.error('Error fetching quiz results:', err);
+        setError('Failed to load quiz results. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchResults();
+    if (subject && quizName) {
+      fetchResults();
+    }
   }, [subject, quizName, attemptId]);
   
   if (loading) {
