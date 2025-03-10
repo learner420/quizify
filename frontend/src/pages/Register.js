@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import API_URL from '../api-config';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -42,23 +43,32 @@ const Register = () => {
     try {
       setError('');
       setLoading(true);
+      console.log('Registering user with API URL:', API_URL);
       
       // Register the user
-      await register({
+      const registerResult = await register({
         username: formData.username,
         email: formData.email,
         password: formData.password
       });
       
-      // Login the user after successful registration
-      await login({
-        email: formData.email,
-        password: formData.password
-      });
+      if (!registerResult.success) {
+        setError(registerResult.message || 'Registration failed');
+        setLoading(false);
+        return;
+      }
       
-      navigate('/dashboard');
+      // Login the user after successful registration
+      const loginResult = await login(formData.email, formData.password);
+      
+      if (loginResult.success) {
+        navigate('/dashboard');
+      } else {
+        setError('Registration successful, but login failed. Please try logging in manually.');
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to register');
+      console.error('Registration error:', err);
+      setError('Failed to register. Please try again.');
     } finally {
       setLoading(false);
     }
