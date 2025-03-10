@@ -288,9 +288,15 @@ const AdminPanel = () => {
     setShowTokenModal(true);
   };
   
+  // Role management
+  const openRoleModal = (user) => {
+    setSelectedUser(user);
+    setRoleValue(user.role);
+    setShowRoleModal(true);
+  };
+  
   // Bulk token management
   const openBulkTokenModal = () => {
-    setSelectedUsers([]);
     setBulkTokenAmount('10');
     setBulkTokenOperation('add');
     setShowBulkTokenModal(true);
@@ -318,34 +324,14 @@ const AdminPanel = () => {
       ...packageEdits,
       [packageName]: {
         ...packageEdits[packageName],
-        [field]: parseInt(value) || 0
+        [field]: field === 'amount' ? parseFloat(value) : parseInt(value) || 0
       }
     });
-  };
-  
-  const addNewPackage = () => {
-    if (!newPackageName || !newPackageAmount || !newPackageTokens) {
-      setError('Please fill in all fields for the new package');
-      return;
-    }
-    
-    setPackageEdits({
-      ...packageEdits,
-      [newPackageName]: {
-        amount: parseInt(newPackageAmount),
-        tokens: parseInt(newPackageTokens)
-      }
-    });
-    
-    // Clear form
-    setNewPackageName('');
-    setNewPackageAmount('');
-    setNewPackageTokens('');
   };
   
   const cancelPackageEdit = () => {
-    setPackageEdits(tokenPackages);
     setEditingPackages(false);
+    setPackageEdits(tokenPackages);
     setNewPackageName('');
     setNewPackageAmount('');
     setNewPackageTokens('');
