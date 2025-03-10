@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 
 const QuizList = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -16,12 +16,13 @@ const QuizList = () => {
       try {
         setLoading(true);
         setError('');
+        console.log('Fetching quizzes for subject:', subject, 'from API URL:', API_URL);
         
-        const response = await axios.get(`/api/quizzes/${subject}`);
-        setQuizzes(response.data.quizzes);
+        const quizzesData = await apiCall(`/api/quizzes/${subject}`);
+        setQuizzes(quizzesData.quizzes || []);
       } catch (err) {
-        setError('Failed to load quizzes');
-        console.error(err);
+        console.error('Error fetching quizzes:', err);
+        setError('Failed to load quizzes. Please try again later.');
       } finally {
         setLoading(false);
       }
