@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
@@ -42,23 +42,28 @@ const ResetPassword = () => {
         setError('');
 
         try {
-            const response = await axios.post('/api/auth/reset-password', {
-                token,
-                email,
-                new_password: newPassword
+            console.log('Resetting password using API URL:', API_URL);
+            const response = await apiCall('/api/auth/reset-password', {
+                method: 'POST',
+                body: JSON.stringify({
+                    token,
+                    email,
+                    new_password: newPassword
+                })
             });
             
-            setMessage(response.data.message);
+            setMessage(response.message || 'Password has been reset successfully.');
             // Clear form
             setNewPassword('');
             setConfirmPassword('');
             
-            // Redirect to login after 3 seconds
+            // Redirect to login page after a delay
             setTimeout(() => {
                 navigate('/login');
             }, 3000);
         } catch (err) {
-            setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+            console.error('Error resetting password:', err);
+            setError('Failed to reset password. The link may have expired or is invalid.');
         } finally {
             setIsSubmitting(false);
         }
