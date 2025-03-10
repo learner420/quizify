@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 import { AuthContext } from '../context/AuthContext';
 
 const TokenPurchase = () => {
@@ -11,22 +11,23 @@ const TokenPurchase = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  const { currentUser, updateUserTokens } = useContext(AuthContext);
+  const { currentUser, updateUser } = useContext(AuthContext);
   
   useEffect(() => {
     const fetchPackages = async () => {
       try {
         setLoading(true);
         setError('');
+        console.log('Fetching token packages from:', API_URL);
         
-        const response = await axios.get('/api/payment/packages');
-        setPackages(Object.entries(response.data.packages).map(([id, pkg]) => ({
+        const packagesData = await apiCall('/api/payment/packages');
+        setPackages(Object.entries(packagesData.packages).map(([id, pkg]) => ({
           id,
           ...pkg
         })));
       } catch (err) {
-        setError('Failed to load token packages');
-        console.error(err);
+        console.error('Error fetching token packages:', err);
+        setError('Failed to load token packages. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -53,66 +54,34 @@ const TokenPurchase = () => {
   
   const handlePurchase = async () => {
     if (!selectedPackage) {
-      return setError('Please select a package');
+      setError('Please select a token package');
+      return;
     }
     
     try {
       setProcessing(true);
       setError('');
       setSuccess('');
+      console.log('Processing token purchase with API URL:', API_URL);
       
-      // Create order
-      const orderResponse = await axios.post('/api/payment/create-order', {
-        package: selectedPackage.id
+      const purchaseData = await apiCall('/api/payment/purchase', {
+        method: 'POST',
+        body: JSON.stringify({
+          package_id: selectedPackage.id
+        })
       });
       
-      const options = {
-        key: orderResponse.data.key_id,
-        amount: orderResponse.data.amount * 100, // Amount in paise
-        currency: orderResponse.data.currency,
-        name: 'Quiz App',
-        description: `Purchase ${selectedPackage.tokens} tokens`,
-        order_id: orderResponse.data.order_id,
-        handler: async function(response) {
-          try {
-            // Verify payment
-            const verifyResponse = await axios.post('/api/payment/verify-payment', {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            });
-            
-            // Update user tokens
-            updateUserTokens(verifyResponse.data.current_tokens);
-            
-            setSuccess(`Payment successful! ${verifyResponse.data.tokens_added} tokens have been added to your account.`);
-          } catch (err) {
-            setError('Payment verification failed');
-            console.error(err);
-          } finally {
-            setProcessing(false);
-          }
-        },
-        prefill: {
-          name: currentUser.username,
-          email: currentUser.email
-        },
-        theme: {
-          color: '#007bff'
-        },
-        modal: {
-          ondismiss: function() {
-            setProcessing(false);
-          }
-        }
-      };
+      // Update user tokens
+      if (updateUser && purchaseData.user) {
+        updateUser(purchaseData.user);
+      }
       
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
-      
+      setSuccess(`Successfully purchased ${selectedPackage.tokens} tokens!`);
+      setSelectedPackage(null);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to initiate payment');
-      console.error(err);
+      console.error('Error purchasing tokens:', err);
+      setError('Failed to process payment. Please try again later.');
+    } finally {
       setProcessing(false);
     }
   };
