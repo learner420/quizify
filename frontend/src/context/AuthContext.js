@@ -1,105 +1,155 @@
-import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import React, { createContext, useState, useEffect } from 'react';
+import API_URL, { apiCall } from './api-config';
 
-// Create context
+// Create the authentication context
 export const AuthContext = createContext();
 
+// Create the authentication provider component
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if user is logged in on initial load
+  // Check authentication status on component mount
   useEffect(() => {
-    const checkAuthStatus = async () => {
+    const checkAuth = async () => {
       try {
-        console.log("Checking authentication...");
-
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/profile`, {
-          withCredentials: true,  // ✅ Ensures cookies are sent if backend uses sessions
-        });
-
-        console.log("Auth response:", response.data);
-
-        setCurrentUser(response.data.user);
-        setIsAuthenticated(true);
+        console.log('Checking authentication...');
+        console.log('Using API URL:', API_URL);
+        
+        // Use the apiCall helper to check authentication
+        const userData = await apiCall('/api/auth/check');
+        console.log('Auth response:', userData);
+        
+        if (userData && userData.authenticated) {
+          setIsAuthenticated(true);
+          setUser(userData.user);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
       } catch (err) {
-        console.error("Auth check failed:", err.message);
-        setCurrentUser(null);
+        console.error('Authentication check failed:', err);
         setIsAuthenticated(false);
+        setUser(null);
+        setError('Failed to check authentication status');
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuthStatus();
+    checkAuth();
   }, []);
 
-  // Register user
-  const register = async (userData) => {
+  // Login function
+  const login = async (username, password) => {
     try {
-      setError(null);
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, userData);
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.error || "Registration failed");
-      throw err;
-    }
-  };
-
-  // Login user
-  const login = async (credentials) => {
-    try {
-      setError(null);
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, credentials, {
-        withCredentials: true,  // ✅ Ensures cookies are set
+      setLoading(true);
+      console.log('Attempting login...');
+      
+      // Use the apiCall helper with POST method
+      const response = await apiCall('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       });
-
-      console.log("Login successful:", response.data);
-
-      setCurrentUser(response.data.user);
-      setIsAuthenticated(true);
-      return response.data;
+      
+      console.log('Login response:', response);
+      
+      if (response && response.success) {
+        setIsAuthenticated(true);
+        setUser(response.user);
+        return { success: true };
+      } else {
+        setError(response.message || 'Login failed');
+        return { success: false, message: response.message };
+      }
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed");
-      throw err;
+      console.error('Login error:', err);
+      setError('Login failed. Please check your credentials and try again.');
+      return { success: false, message: 'Login failed. Please try again.' };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Logout user
+  // Logout function
   const logout = async () => {
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {}, { withCredentials: true });
-
-      setCurrentUser(null);
-      setIsAuthenticated(false);
-    } catch (err) {
-      setError(err.response?.data?.error || "Logout failed");
-    }
-  };
-
-  // Update user tokens
-  const updateUserTokens = (newTokens) => {
-    if (currentUser) {
-      setCurrentUser({
-        ...currentUser,
-        tokens: newTokens,
+      setLoading(true);
+      console.log('Logging out...');
+      
+      // Use the apiCall helper for logout
+      await apiCall('/api/auth/logout', {
+        method: 'POST',
       });
+      
+      setIsAuthenticated(false);
+      setUser(null);
+      return { success: true };
+    } catch (err) {
+      console.error('Logout error:', err);
+      return { success: false, message: 'Logout failed' };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Context value
-  const value = {
-    currentUser,
-    isAuthenticated,
-    loading,
-    error,
-    register,
-    login,
-    logout,
-    updateUserTokens,
+  // Register function
+  const register = async (userData) => {
+    try {
+      setLoading(true);
+      console.log('Registering user...');
+      
+      // Use the apiCall helper with POST method
+      const response = await apiCall('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      console.log('Registration response:', response);
+      
+      if (response && response.success) {
+        return { success: true };
+      } else {
+        setError(response.message || 'Registration failed');
+        return { success: false, message: response.message };
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Registration failed. Please try again.');
+      return { success: false, message: 'Registration failed. Please try again.' };
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // Update user data
+  const updateUser = (userData) => {
+    setUser(userData);
+  };
+
+  // Provide the authentication context to children components
+  return (
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        user,
+        loading,
+        error,
+        login,
+        logout,
+        register,
+        updateUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
