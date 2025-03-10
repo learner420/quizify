@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import API_URL from '../api-config';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -32,11 +33,17 @@ const Login = () => {
     try {
       setError('');
       setLoading(true);
+      console.log('Attempting login with API URL:', API_URL);
       
-      await login(formData);
-      navigate('/dashboard');
+      const result = await login(formData.email, formData.password);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message || 'Failed to login');
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to login');
+      console.error('Login error:', err);
+      setError('Failed to login. Please check your credentials and try again.');
     } finally {
       setLoading(false);
     }
