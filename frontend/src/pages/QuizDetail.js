@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, ProgressBar, Alert } from 'react-bootstrap';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 
 const QuizDetail = () => {
   const [quiz, setQuiz] = useState(null);
@@ -55,7 +55,7 @@ const QuizDetail = () => {
         setError('');
         
         // Build the URL with appropriate parameters
-        let url = `/api/quizzes/${subject}/${quizName}`;
+        let endpoint = `/api/quizzes/${subject}/${quizName}`;
         const params = new URLSearchParams();
         
         if (attemptId && !isNewAttempt) {
@@ -67,162 +67,95 @@ const QuizDetail = () => {
         }
         
         if (params.toString()) {
-          url += `?${params.toString()}`;
+          endpoint += `?${params.toString()}`;
         }
         
-        console.log("Fetching quiz with URL:", url);
-        const response = await axios.get(url);
-        setQuiz(response.data);
-        setQuizStarted(response.data.has_attempted);
+        console.log("Fetching quiz with URL:", API_URL + endpoint);
+        const quizData = await apiCall(endpoint);
+        setQuiz(quizData);
+        setQuizStarted(quizData.has_attempted);
         
         // Store the attempt ID
-        if (response.data.attempt_id) {
-          setAttemptId(response.data.attempt_id);
-          
-          // Update URL with attempt_id without navigating
-          // If it was a new attempt, we'll remove the new_attempt parameter
-          const newParams = new URLSearchParams();
-          newParams.append('attempt_id', response.data.attempt_id);
-          const newUrl = `${window.location.pathname}?${newParams.toString()}`;
-          window.history.replaceState(null, '', newUrl);
-          
-          // Reset the new attempt flag
-          setIsNewAttempt(false);
+        if (quizData.attempt_id) {
+          setAttemptId(quizData.attempt_id);
         }
         
-        // Initialize selected answers array
-        const savedAnswers = attemptId 
-          ? localStorage.getItem(`quiz_${subject}_${quizName}_${attemptId}_answers`)
-          : localStorage.getItem(`quiz_${subject}_${quizName}_answers`);
-        
-        const savedCurrentQuestion = attemptId
-          ? localStorage.getItem(`quiz_${subject}_${quizName}_${attemptId}_current`)
-          : localStorage.getItem(`quiz_${subject}_${quizName}_current`);
-        
-        if (savedAnswers && response.data.has_attempted && !isNewAttempt) {
-          // If we have saved answers and the user has already started this quiz, restore them
-          setSelectedAnswers(JSON.parse(savedAnswers));
+        // Load saved answers if they exist
+        if (quizData.attempt_id) {
+          const savedAnswers = localStorage.getItem(`quiz_${subject}_${quizName}_${quizData.attempt_id}_answers`);
+          const savedCurrentQuestion = localStorage.getItem(`quiz_${subject}_${quizName}_${quizData.attempt_id}_current`);
+          
+          if (savedAnswers) {
+            setSelectedAnswers(JSON.parse(savedAnswers));
+          }
+          
           if (savedCurrentQuestion) {
             setCurrentQuestion(parseInt(savedCurrentQuestion, 10));
           }
-        } else {
-          // Otherwise, initialize with empty values
-          setSelectedAnswers(new Array(response.data.questions.length).fill(''));
-        }
-        
-        // Show token deduction message if a token was deducted
-        if (response.data.token_deducted) {
-          alert(`1 token has been deducted. You now have ${response.data.user_tokens} tokens remaining.`);
-        }
-        // Show warning if user hasn't attempted this quiz and needs tokens
-        else if (!response.data.has_attempted && response.data.token_required && !response.data.is_new_attempt) {
-          if (response.data.user_tokens < 1) {
-            setError('You need at least 1 token to take this quiz');
-            return;
-          }
-          const confirmStart = window.confirm(`Taking this quiz will cost 1 token. You currently have ${response.data.user_tokens} tokens. Do you want to continue?`);
-          if (!confirmStart) {
-            navigate(`/quizzes/${subject}`);
-            return;
-          }
         }
       } catch (err) {
-        if (err.response && err.response.status === 403) {
-          // Check if this is a token-related error
-          if (err.response.data.needs_tokens) {
-            setError(
-              <div>
-                <p>{err.response.data.error}</p>
-                <p>You currently have {err.response.data.tokens} tokens.</p>
-                <Button as={Link} to="/purchase-tokens" variant="success" className="mt-2">
-                  Purchase Tokens
-                </Button>
-              </div>
-            );
-          } else {
-            setError('You need at least 1 token to take this quiz');
-          }
-        } else {
-          setError('Failed to load quiz: ' + (err.response?.data?.error || err.message));
-        }
-        console.error(err);
+        console.error("Error fetching quiz:", err);
+        setError('Failed to load quiz. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     
     fetchQuiz();
-  }, [subject, quizName, navigate, attemptId, isNewAttempt]);
+  }, [subject, quizName, attemptId, isNewAttempt]);
   
-  const handleAnswerSelect = (answer) => {
-    const newAnswers = [...selectedAnswers];
-    newAnswers[currentQuestion] = answer;
-    setSelectedAnswers(newAnswers);
-  };
-  
-  const handleNext = () => {
-    if (currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+  const handleStartQuiz = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Start the quiz
+      const startResponse = await apiCall(`/api/quizzes/${subject}/${quizName}/start`, {
+        method: 'POST'
+      });
+      
+      setQuizStarted(true);
+      setAttemptId(startResponse.attempt_id);
+    } catch (err) {
+      console.error("Error starting quiz:", err);
+      setError('Failed to start quiz. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
   
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
+  const handleAnswerSelect = (questionIndex, answerIndex) => {
+    const newSelectedAnswers = [...selectedAnswers];
+    newSelectedAnswers[questionIndex] = answerIndex;
+    setSelectedAnswers(newSelectedAnswers);
   };
   
-  const handleSubmit = async () => {
-    // Check if all questions are answered
-    const unansweredQuestions = selectedAnswers.filter(answer => answer === '').length;
-    
-    if (unansweredQuestions > 0) {
-      const confirmSubmit = window.confirm(`You have ${unansweredQuestions} unanswered question(s). Are you sure you want to submit?`);
-      if (!confirmSubmit) {
-        return;
-      }
-    }
-    
+  const handleSubmitQuiz = async () => {
     try {
       setSubmitting(true);
       setError('');
       
-      // Include attempt_id in the submission if we have one
-      const payload = {
-        answers: selectedAnswers
-      };
+      // Prepare the answers in the format expected by the API
+      const formattedAnswers = selectedAnswers.map((answerIndex, questionIndex) => ({
+        question_id: quiz.questions[questionIndex].id,
+        selected_answer_index: answerIndex
+      }));
       
-      if (attemptId) {
-        payload.attempt_id = attemptId;
-      }
+      // Submit the quiz
+      const submitResponse = await apiCall(`/api/quizzes/${subject}/${quizName}/submit`, {
+        method: 'POST',
+        body: JSON.stringify({
+          attempt_id: attemptId,
+          answers: formattedAnswers
+        })
+      });
       
-      await axios.post(`/api/quizzes/${subject}/${quizName}/submit`, payload);
-      
-      // Clear saved answers from localStorage after successful submission
-      if (attemptId) {
-        localStorage.removeItem(`quiz_${subject}_${quizName}_${attemptId}_answers`);
-        localStorage.removeItem(`quiz_${subject}_${quizName}_${attemptId}_current`);
-      } else {
-        localStorage.removeItem(`quiz_${subject}_${quizName}_answers`);
-        localStorage.removeItem(`quiz_${subject}_${quizName}_current`);
-      }
-      
-      navigate(`/results/${subject}/${quizName}`);
+      // Navigate to the results page
+      navigate(`/quiz-results/${subject}/${quizName}?attempt_id=${attemptId}`);
     } catch (err) {
-      console.error('Submit error:', err);
-      if (err.response) {
-        console.error('Response data:', err.response.data);
-        if (err.response.status === 404) {
-          // Handle the case where the quiz attempt record is missing
-          setError('Your quiz session has expired. Please refresh the page to start again.');
-        } else if (err.response.status === 403) {
-          setError('You need at least 1 token to take this quiz');
-        } else {
-          setError('Failed to submit quiz: ' + (err.response.data.error || err.message));
-        }
-      } else {
-        setError('Failed to submit quiz: Network error');
-      }
+      console.error("Error submitting quiz:", err);
+      setError('Failed to submit quiz. Please try again later.');
+    } finally {
       setSubmitting(false);
     }
   };
@@ -320,8 +253,8 @@ const QuizDetail = () => {
               <Button
                 key={index}
                 variant="outline-primary"
-                className={`option-btn ${selectedAnswers[currentQuestion] === option ? 'selected' : ''}`}
-                onClick={() => handleAnswerSelect(option)}
+                className={`option-btn ${selectedAnswers[currentQuestion] === index ? 'selected' : ''}`}
+                onClick={() => handleAnswerSelect(currentQuestion, index)}
               >
                 {String.fromCharCode(65 + index)}. {option}
               </Button>
@@ -331,7 +264,7 @@ const QuizDetail = () => {
           <div className="d-flex justify-content-between">
             <Button
               variant="secondary"
-              onClick={handlePrevious}
+              onClick={() => setCurrentQuestion(currentQuestion - 1)}
               disabled={currentQuestion === 0}
             >
               <i className="fas fa-arrow-left me-2"></i>
@@ -341,7 +274,7 @@ const QuizDetail = () => {
             {currentQuestion < quiz.questions.length - 1 ? (
               <Button
                 variant="primary"
-                onClick={handleNext}
+                onClick={() => setCurrentQuestion(currentQuestion + 1)}
               >
                 Next
                 <i className="fas fa-arrow-right ms-2"></i>
@@ -349,7 +282,7 @@ const QuizDetail = () => {
             ) : (
               <Button
                 variant="success"
-                onClick={handleSubmit}
+                onClick={handleSubmitQuiz}
                 disabled={submitting}
               >
                 {submitting ? 'Submitting...' : 'Submit Quiz'}
