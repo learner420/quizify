@@ -105,13 +105,15 @@ function AuthRoute({ children }) {
 // Home route component (redirects to dashboard if already logged in)
 function HomeRoute({ children }) {
   const { isAuthenticated, loading } = React.useContext(AuthContext);
-  
+
   if (loading) {
     return <div className="text-center py-5">Loading...</div>;
   }
-  
-  return isAuthenticated ? <Navigate to="/dashboard" /> : children;
+
+  // Allow non-logged-in users to stay on Home page
+  return isAuthenticated === false ? children : <Navigate to="/dashboard" />;
 }
+
 
 // Admin route component
 function AdminRoute({ children }) {
