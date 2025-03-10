@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import API_URL, { apiCall } from './api-config';
+import API_URL, { apiCall } from '../api-config';
 
 // Create the authentication context
 export const AuthContext = createContext();
