@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import API_URL, { apiCall } from './api-config';
+import API_URL, { apiCall } from '../api-config';
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
