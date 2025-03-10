@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Table, Badge, Button, Alert, Tabs, Tab } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 import { AuthContext } from '../context/AuthContext';
 
 const Profile = () => {
@@ -17,17 +17,18 @@ const Profile = () => {
       try {
         setLoading(true);
         setError('');
+        console.log('Fetching profile data from:', API_URL);
         
         // Fetch quiz attempts
-        const attemptsResponse = await axios.get('/api/quizzes/attempts');
-        setAttempts(attemptsResponse.data.attempts);
+        const attemptsData = await apiCall('/api/quizzes/attempts');
+        setAttempts(attemptsData.attempts || []);
         
         // Fetch transactions
-        const transactionsResponse = await axios.get('/api/payment/transactions');
-        setTransactions(transactionsResponse.data.transactions);
+        const transactionsData = await apiCall('/api/payment/transactions');
+        setTransactions(transactionsData.transactions || []);
       } catch (err) {
-        setError('Failed to load profile data');
-        console.error(err);
+        console.error('Error fetching profile data:', err);
+        setError('Failed to load profile data. Please try again later.');
       } finally {
         setLoading(false);
       }
