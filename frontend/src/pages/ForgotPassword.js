@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -16,11 +16,16 @@ const ForgotPassword = () => {
         setError('');
 
         try {
-            const response = await axios.post('/api/auth/forgot-password', { email });
-            setMessage(response.data.message);
+            console.log('Sending password reset request to:', API_URL);
+            const response = await apiCall('/api/auth/forgot-password', {
+                method: 'POST',
+                body: JSON.stringify({ email })
+            });
+            setMessage(response.message || 'Password reset email sent. Please check your inbox.');
             setEmail(''); // Clear the form
         } catch (err) {
-            setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+            console.error('Error requesting password reset:', err);
+            setError('Failed to send password reset email. Please try again later.');
         } finally {
             setIsSubmitting(false);
         }
