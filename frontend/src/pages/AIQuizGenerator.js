@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Container, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 import { AuthContext } from '../context/AuthContext';
 
 const AIQuizGenerator = () => {
@@ -15,7 +15,7 @@ const AIQuizGenerator = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  const { currentUser, updateUserTokens } = useContext(AuthContext);
+  const { currentUser, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
   
   const handleChange = (e) => {
@@ -46,27 +46,32 @@ const AIQuizGenerator = () => {
       setLoading(true);
       setError('');
       setSuccess('');
+      console.log('Generating AI quiz using API URL:', API_URL);
       
-      const response = await axios.post('/api/ai/generate-quiz', {
-        subject: formData.subject,
-        topic: formData.topic,
-        num_questions: formData.numQuestions,
-        difficulty: formData.difficulty
+      const response = await apiCall('/api/ai/generate-quiz', {
+        method: 'POST',
+        body: JSON.stringify({
+          subject: formData.subject,
+          topic: formData.topic,
+          num_questions: formData.numQuestions,
+          difficulty: formData.difficulty
+        })
       });
       
-      // Update user tokens
-      updateUserTokens(response.data.tokens_remaining);
+      // Update user tokens if provided in the response
+      if (response.user && updateUser) {
+        updateUser(response.user);
+      }
       
-      setSuccess(`Quiz "${formData.topic}" generated successfully! You used ${requiredTokens} tokens and have ${response.data.tokens_remaining} tokens remaining.`);
+      setSuccess('Quiz generated successfully!');
       
-      // Navigate to the new quiz after a short delay
+      // Navigate to the new quiz
       setTimeout(() => {
-        navigate(`/quizzes/${response.data.subject}/${response.data.topic}`);
-      }, 2000);
-      
+        navigate(`/quiz/${response.quiz.subject}/${response.quiz.name}`);
+      }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to generate quiz');
-      console.error(err);
+      console.error('Error generating quiz:', err);
+      setError('Failed to generate quiz. Please try again later.');
     } finally {
       setLoading(false);
     }
