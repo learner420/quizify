@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-
-// Add this line to get the API URL from environment variables
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import API_URL, { apiCall } from './api-config';
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -13,28 +10,32 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Log the API URL for debugging
+    console.log('Dashboard - Using API URL:', API_URL);
+
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log('Fetching dashboard data...');
         
-        // Fetch user data
-        const userResponse = await axios.get(`${API_URL}/api/user/profile`, {
-          withCredentials: true
-        });
-        setUserData(userResponse.data);
+        // Fetch user data using the apiCall helper
+        const userData = await apiCall('/api/user/profile');
+        console.log('User profile data:', userData);
+        setUserData(userData);
         
-        // Fetch quizzes
-        const quizzesResponse = await axios.get(`${API_URL}/api/quizzes`, {
-          withCredentials: true
-        });
+        // Fetch quizzes using the apiCall helper
+        const quizzesData = await apiCall('/api/quizzes');
+        console.log('Quizzes data:', quizzesData);
         
-        // Make sure quizzes is always an array, even if the API returns null or undefined
-        setQuizzes(quizzesResponse.data.quizzes || []);
+        // Make sure quizzes is always an array
+        setQuizzes(quizzesData.quizzes || []);
         
         setLoading(false);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
-        setError("Failed to load dashboard data. Please try again later.");
+        
+        // Set a user-friendly error message
+        setError("Failed to load dashboard data. Please check your connection and make sure the backend is running.");
         setLoading(false);
       }
     };
@@ -46,16 +47,43 @@ const Dashboard = () => {
   if (loading) {
     return (
       <Container className="mt-5">
-        <Alert variant="info">Loading dashboard data...</Alert>
+        <Alert variant="info">
+          <div className="d-flex align-items-center">
+            <div className="spinner-border spinner-border-sm me-2" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            Loading dashboard data from {API_URL}...
+          </div>
+        </Alert>
       </Container>
     );
   }
 
-  // Show error state
+  // Show error state with more details
   if (error) {
     return (
       <Container className="mt-5">
-        <Alert variant="danger">{error}</Alert>
+        <Alert variant="danger">
+          <h4>Error Loading Dashboard</h4>
+          <p>{error}</p>
+          <hr />
+          <p>
+            <strong>API URL:</strong> {API_URL}<br />
+            <strong>Troubleshooting:</strong>
+          </p>
+          <ul>
+            <li>Check if the backend server is running</li>
+            <li>Verify your API URL is correct</li>
+            <li>Check for CORS issues in the browser console</li>
+            <li>Try clearing your browser cache and cookies</li>
+          </ul>
+          <Button 
+            variant="outline-primary" 
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </Alert>
       </Container>
     );
   }
@@ -65,8 +93,7 @@ const Dashboard = () => {
   const tokens = userData?.tokens || 0;
   const quizAttempts = userData?.quiz_attempts || [];
   
-  // This is likely where the error is occurring - make sure we're safely accessing arrays
-  // and checking for undefined before accessing length or mapping
+  // Safely get recent attempts
   const recentAttempts = quizAttempts && quizAttempts.length > 0 
     ? quizAttempts.slice(0, 5) 
     : [];
@@ -74,6 +101,7 @@ const Dashboard = () => {
   return (
     <Container className="mt-5">
       <h1>Welcome, {username}!</h1>
+      <p className="text-muted">Connected to: {API_URL}</p>
       
       <Row className="mt-4">
         <Col md={4}>
@@ -96,7 +124,7 @@ const Dashboard = () => {
           <Card className="mb-4">
             <Card.Body>
               <Card.Title>Available Quizzes</Card.Title>
-              {quizzes.length > 0 ? (
+              {quizzes && quizzes.length > 0 ? (
                 <ul className="list-group">
                   {quizzes.map((quiz, index) => (
                     <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
@@ -116,7 +144,7 @@ const Dashboard = () => {
           <Card>
             <Card.Body>
               <Card.Title>Recent Quiz Attempts</Card.Title>
-              {recentAttempts.length > 0 ? (
+              {recentAttempts && recentAttempts.length > 0 ? (
                 <ul className="list-group">
                   {recentAttempts.map((attempt, index) => (
                     <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
@@ -131,7 +159,7 @@ const Dashboard = () => {
               ) : (
                 <Alert variant="info">You haven't attempted any quizzes yet.</Alert>
               )}
-              {quizAttempts?.length > 5 && (
+              {quizAttempts && quizAttempts.length > 5 && (
                 <div className="mt-3 text-center">
                   <Link to="/attempts">
                     <Button variant="outline-secondary">View All Attempts</Button>
@@ -146,4 +174,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;
