@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Table, Form, Button, Alert, Tabs, Tab, Modal, InputGroup, Badge } from 'react-bootstrap';
-import axios from 'axios';
+import API_URL, { apiCall } from '../api-config';
 import { AuthContext } from '../context/AuthContext';
 
 const AdminPanel = () => {
@@ -39,17 +39,19 @@ const AdminPanel = () => {
       try {
         setLoading(true);
         setError('');
+        console.log('Fetching admin data from:', API_URL);
         
         // Fetch users
-        const usersResponse = await axios.get('/api/admin/users');
-        setUsers(usersResponse.data.users);
+        const usersData = await apiCall('/api/admin/users');
+        setUsers(usersData.users || []);
         
         // Fetch token packages
-        const packagesResponse = await axios.get('/api/admin/token-packages');
-        setTokenPackages(packagesResponse.data.packages);
-        setPackageEdits(packagesResponse.data.packages);
+        const packagesData = await apiCall('/api/admin/token-packages');
+        setTokenPackages(packagesData.packages || {});
+        setPackageEdits(packagesData.packages || {});
       } catch (err) {
-        setError('Failed to load admin data: ' + (err.response?.data?.error || err.message));
+        console.error('Error fetching admin data:', err);
+        setError('Failed to load admin data. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -58,6 +60,225 @@ const AdminPanel = () => {
     fetchData();
   }, []);
   
+  // Handle user search
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRole = filterRole === 'all' || user.role === filterRole;
+    
+    return matchesSearch && matchesRole;
+  });
+  
+  // Handle token adjustment
+  const handleTokenAdjustment = async () => {
+    if (!selectedUser || !tokenAmount) return;
+    
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      console.log('Adjusting tokens for user using API URL:', API_URL);
+      
+      const response = await apiCall('/api/admin/adjust-tokens', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: selectedUser.id,
+          operation: tokenAdjustment,
+          amount: parseInt(tokenAmount)
+        })
+      });
+      
+      // Update the user in the list
+      setUsers(users.map(user => 
+        user.id === selectedUser.id 
+          ? { ...user, tokens: response.new_token_balance } 
+          : user
+      ));
+      
+      setSuccess(`Successfully ${tokenAdjustment === 'add' ? 'added' : 'removed'} ${tokenAmount} tokens for ${selectedUser.username}`);
+      setShowTokenModal(false);
+    } catch (err) {
+      console.error('Error adjusting tokens:', err);
+      setError('Failed to adjust tokens. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Handle role change
+  const handleRoleChange = async () => {
+    if (!selectedUser || !roleValue) return;
+    
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      console.log('Changing role for user using API URL:', API_URL);
+      
+      const response = await apiCall('/api/admin/change-role', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: selectedUser.id,
+          new_role: roleValue
+        })
+      });
+      
+      // Update the user in the list
+      setUsers(users.map(user => 
+        user.id === selectedUser.id 
+          ? { ...user, role: roleValue } 
+          : user
+      ));
+      
+      setSuccess(`Successfully changed role for ${selectedUser.username} to ${roleValue}`);
+      setShowRoleModal(false);
+    } catch (err) {
+      console.error('Error changing role:', err);
+      setError('Failed to change role. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Handle bulk token adjustment
+  const handleBulkTokenAdjustment = async () => {
+    if (selectedUsers.length === 0 || !bulkTokenAmount) return;
+    
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      console.log('Adjusting tokens in bulk using API URL:', API_URL);
+      
+      const response = await apiCall('/api/admin/bulk-adjust-tokens', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_ids: selectedUsers,
+          operation: bulkTokenOperation,
+          amount: parseInt(bulkTokenAmount)
+        })
+      });
+      
+      // Update the users in the list
+      setUsers(users.map(user => 
+        selectedUsers.includes(user.id) 
+          ? { ...user, tokens: response.updated_users[user.id] || user.tokens } 
+          : user
+      ));
+      
+      setSuccess(`Successfully ${bulkTokenOperation === 'add' ? 'added' : 'removed'} ${bulkTokenAmount} tokens for ${selectedUsers.length} users`);
+      setShowBulkTokenModal(false);
+      setSelectedUsers([]);
+    } catch (err) {
+      console.error('Error adjusting tokens in bulk:', err);
+      setError('Failed to adjust tokens in bulk. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Handle package updates
+  const handleSavePackages = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      console.log('Updating token packages using API URL:', API_URL);
+      
+      const response = await apiCall('/api/admin/update-packages', {
+        method: 'POST',
+        body: JSON.stringify({
+          packages: packageEdits
+        })
+      });
+      
+      setTokenPackages(response.packages || packageEdits);
+      setSuccess('Token packages updated successfully');
+      setEditingPackages(false);
+    } catch (err) {
+      console.error('Error updating packages:', err);
+      setError('Failed to update token packages. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Handle adding a new package
+  const handleAddPackage = async () => {
+    if (!newPackageName || !newPackageAmount || !newPackageTokens) {
+      setError('Please fill in all fields for the new package');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      console.log('Adding new token package using API URL:', API_URL);
+      
+      const response = await apiCall('/api/admin/add-package', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newPackageName,
+          amount: parseFloat(newPackageAmount),
+          tokens: parseInt(newPackageTokens)
+        })
+      });
+      
+      // Update packages
+      setTokenPackages(response.packages || {
+        ...tokenPackages,
+        [response.package_id]: {
+          name: newPackageName,
+          amount: parseFloat(newPackageAmount),
+          tokens: parseInt(newPackageTokens)
+        }
+      });
+      
+      // Reset form
+      setNewPackageName('');
+      setNewPackageAmount('');
+      setNewPackageTokens('');
+      
+      setSuccess('New token package added successfully');
+    } catch (err) {
+      console.error('Error adding package:', err);
+      setError('Failed to add new token package. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Handle deleting a package
+  const handleDeletePackage = async (packageId) => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      console.log('Deleting token package using API URL:', API_URL);
+      
+      const response = await apiCall('/api/admin/delete-package', {
+        method: 'POST',
+        body: JSON.stringify({
+          package_id: packageId
+        })
+      });
+      
+      // Remove package from state
+      const updatedPackages = { ...tokenPackages };
+      delete updatedPackages[packageId];
+      setTokenPackages(updatedPackages);
+      
+      setSuccess('Token package deleted successfully');
+    } catch (err) {
+      console.error('Error deleting package:', err);
+      setError('Failed to delete token package. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // Token management
   const openTokenModal = (user) => {
     setSelectedUser(user);
@@ -65,40 +286,6 @@ const AdminPanel = () => {
     setTokenAmount('10');
     setTokenAdjustment('add');
     setShowTokenModal(true);
-  };
-  
-  const updateUserTokens = async () => {
-    try {
-      setError('');
-      
-      let newTokenValue;
-      if (tokenAdjustment === 'set') {
-        newTokenValue = parseInt(tokenValue);
-      } else if (tokenAdjustment === 'add') {
-        newTokenValue = selectedUser.tokens + parseInt(tokenAmount);
-      } else if (tokenAdjustment === 'subtract') {
-        newTokenValue = Math.max(0, selectedUser.tokens - parseInt(tokenAmount));
-      }
-      
-      const response = await axios.put(`/api/admin/users/${selectedUser.id}/tokens`, {
-        tokens: newTokenValue
-      });
-      
-      // Update the user in the list
-      setUsers(users.map(user => 
-        user.id === selectedUser.id 
-          ? { ...user, tokens: response.data.user.tokens } 
-          : user
-      ));
-      
-      setSuccess(`Tokens updated for ${selectedUser.username} to ${response.data.user.tokens}`);
-      setShowTokenModal(false);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError('Failed to update tokens: ' + (err.response?.data?.error || err.message));
-    }
   };
   
   // Bulk token management
@@ -122,86 +309,6 @@ const AdminPanel = () => {
       setSelectedUsers([]);
     } else {
       setSelectedUsers(filteredUsers.map(user => user.id));
-    }
-  };
-  
-  const updateBulkTokens = async () => {
-    if (selectedUsers.length === 0) {
-      setError('Please select at least one user');
-      return;
-    }
-    
-    try {
-      setError('');
-      let successCount = 0;
-      
-      for (const userId of selectedUsers) {
-        const user = users.find(u => u.id === userId);
-        if (!user) continue;
-        
-        let newTokenValue;
-        if (bulkTokenOperation === 'set') {
-          newTokenValue = parseInt(bulkTokenAmount);
-        } else if (bulkTokenOperation === 'add') {
-          newTokenValue = user.tokens + parseInt(bulkTokenAmount);
-        } else if (bulkTokenOperation === 'subtract') {
-          newTokenValue = Math.max(0, user.tokens - parseInt(bulkTokenAmount));
-        }
-        
-        const response = await axios.put(`/api/admin/users/${userId}/tokens`, {
-          tokens: newTokenValue
-        });
-        
-        // Update the user in the list
-        setUsers(users.map(u => 
-          u.id === userId 
-            ? { ...u, tokens: response.data.user.tokens } 
-            : u
-        ));
-        
-        successCount++;
-      }
-      
-      setSuccess(`Tokens updated for ${successCount} users`);
-      setShowBulkTokenModal(false);
-      setSelectedUsers([]);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError('Failed to update tokens: ' + (err.response?.data?.error || err.message));
-    }
-  };
-  
-  // Role management
-  const openRoleModal = (user) => {
-    setSelectedUser(user);
-    setRoleValue(user.role);
-    setShowRoleModal(true);
-  };
-  
-  const updateUserRole = async () => {
-    try {
-      setError('');
-      
-      const response = await axios.put(`/api/admin/users/${selectedUser.id}/role`, {
-        role: roleValue
-      });
-      
-      // Update the user in the list
-      setUsers(users.map(user => 
-        user.id === selectedUser.id 
-          ? { ...user, role: response.data.user.role } 
-          : user
-      ));
-      
-      setSuccess(`Role updated for ${selectedUser.username} to ${response.data.user.role}`);
-      setShowRoleModal(false);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError('Failed to update role: ' + (err.response?.data?.error || err.message));
     }
   };
   
@@ -236,23 +343,6 @@ const AdminPanel = () => {
     setNewPackageTokens('');
   };
   
-  const savePackageChanges = async () => {
-    try {
-      setError('');
-      
-      const response = await axios.put('/api/admin/token-packages', packageEdits);
-      
-      setTokenPackages(response.data.packages);
-      setEditingPackages(false);
-      setSuccess('Token packages updated successfully');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError('Failed to update packages: ' + (err.response?.data?.error || err.message));
-    }
-  };
-  
   const cancelPackageEdit = () => {
     setPackageEdits(tokenPackages);
     setEditingPackages(false);
@@ -260,17 +350,6 @@ const AdminPanel = () => {
     setNewPackageAmount('');
     setNewPackageTokens('');
   };
-  
-  // Filter and search users
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRole = filterRole === 'all' || user.role === filterRole;
-    
-    return matchesSearch && matchesRole;
-  });
   
   if (loading) {
     return (
@@ -422,7 +501,7 @@ const AdminPanel = () => {
                   <div>
                     <Button 
                       variant="success" 
-                      onClick={savePackageChanges}
+                      onClick={handleSavePackages}
                       className="me-2"
                     >
                       Save Changes
@@ -508,7 +587,7 @@ const AdminPanel = () => {
                         <td>
                           <Button 
                             variant="success" 
-                            onClick={addNewPackage}
+                            onClick={handleAddPackage}
                           >
                             Add Package
                           </Button>
@@ -610,7 +689,7 @@ const AdminPanel = () => {
           <Button variant="secondary" onClick={() => setShowTokenModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={updateUserTokens}>
+          <Button variant="primary" onClick={handleTokenAdjustment}>
             Update Tokens
           </Button>
         </Modal.Footer>
@@ -733,7 +812,7 @@ const AdminPanel = () => {
           </Button>
           <Button 
             variant="primary" 
-            onClick={updateBulkTokens}
+            onClick={handleBulkTokenAdjustment}
             disabled={selectedUsers.length === 0}
           >
             Apply to {selectedUsers.length} Users
@@ -764,7 +843,7 @@ const AdminPanel = () => {
           <Button variant="secondary" onClick={() => setShowRoleModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={updateUserRole}>
+          <Button variant="primary" onClick={handleRoleChange}>
             Update Role
           </Button>
         </Modal.Footer>
