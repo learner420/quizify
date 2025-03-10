@@ -1,14 +1,11 @@
 {
-     "buildCommand": "npm run build",
-     "outputDirectory": "build",
-     "framework": "create-react-app",
-     "routes": [
-       {
-         "source": "/(.*)",
-         "destination": "/index.html"
-       }
-     ],
-     "env": {
-       "REACT_APP_API_URL": "https://dk12548.pythonanywhere.com"
-     }
-   }
+  "build": {
+    "command": "npm run build"
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "env": {
+    "REACT_APP_API_URL": "https://dk12548.pythonanywhere.com"
+  }
+}
