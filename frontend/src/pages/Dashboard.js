@@ -1,203 +1,145 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Badge, Alert } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { AuthContext } from '../context/AuthContext';
+import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+
+// Add this line to get the API URL from environment variables
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Dashboard = () => {
-  const [subjects, setSubjects] = useState([]);
-  const [attempts, setAttempts] = useState([]);
+  const [userData, setUserData] = useState(null);
+  const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
-  const { currentUser } = useContext(AuthContext);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        setError('');
         
-        // Fetch subjects
-        const subjectsResponse = await axios.get('/api/quizzes');
-        setSubjects(subjectsResponse.data.subjects);
+        // Fetch user data
+        const userResponse = await axios.get(`${API_URL}/api/user/profile`, {
+          withCredentials: true
+        });
+        setUserData(userResponse.data);
         
-        // Fetch user's quiz attempts
-        const attemptsResponse = await axios.get('/api/quizzes/attempts');
-        setAttempts(attemptsResponse.data.attempts);
+        // Fetch quizzes
+        const quizzesResponse = await axios.get(`${API_URL}/api/quizzes`, {
+          withCredentials: true
+        });
         
+        // Make sure quizzes is always an array, even if the API returns null or undefined
+        setQuizzes(quizzesResponse.data.quizzes || []);
+        
+        setLoading(false);
       } catch (err) {
-        setError('Failed to load dashboard data');
-        console.error(err);
-      } finally {
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data. Please try again later.");
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, []);
 
-  // Calculate stats
-  const totalAttempts = attempts.length;
-  const averageScore = totalAttempts > 0 
-    ? (attempts.reduce((sum, attempt) => sum + attempt.percentage, 0) / totalAttempts).toFixed(1) 
-    : 0;
+  // Show loading state
+  if (loading) {
+    return (
+      <Container className="mt-5">
+        <Alert variant="info">Loading dashboard data...</Alert>
+      </Container>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Container className="mt-5">
+        <Alert variant="danger">{error}</Alert>
+      </Container>
+    );
+  }
+
+  // Safely access user data
+  const username = userData?.username || 'User';
+  const tokens = userData?.tokens || 0;
+  const quizAttempts = userData?.quiz_attempts || [];
   
-  // Get recent attempts (last 5)
-  const recentAttempts = attempts.slice(0, 5);
+  // This is likely where the error is occurring - make sure we're safely accessing arrays
+  // and checking for undefined before accessing length or mapping
+  const recentAttempts = quizAttempts && quizAttempts.length > 0 
+    ? quizAttempts.slice(0, 5) 
+    : [];
 
   return (
-    <Container>
-      <h1 className="mb-4">Dashboard</h1>
+    <Container className="mt-5">
+      <h1>Welcome, {username}!</h1>
       
-      {error && <Alert variant="danger">{error}</Alert>}
-      
-      {/* User Stats */}
-      <Row className="mb-4">
-        <Col md={4} className="mb-3 mb-md-0">
-          <Card className="h-100 bg-primary text-white">
-            <Card.Body className="d-flex flex-column align-items-center justify-content-center">
-              <h1 className="display-4 fw-bold">{currentUser?.tokens || 0}</h1>
-              <p className="mb-0">Available Tokens</p>
-              <Button 
-                as={Link} 
-                to="/purchase-tokens" 
-                variant="light" 
-                className="mt-3"
-              >
-                Buy More Tokens
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4} className="mb-3 mb-md-0">
-          <Card className="h-100 bg-success text-white">
-            <Card.Body className="d-flex flex-column align-items-center justify-content-center">
-              <h1 className="display-4 fw-bold">{totalAttempts}</h1>
-              <p className="mb-0">Quizzes Taken</p>
-            </Card.Body>
-          </Card>
-        </Col>
+      <Row className="mt-4">
         <Col md={4}>
-          <Card className="h-100 bg-info text-white">
-            <Card.Body className="d-flex flex-column align-items-center justify-content-center">
-              <h1 className="display-4 fw-bold">{averageScore}%</h1>
-              <p className="mb-0">Average Score</p>
+          <Card className="mb-4">
+            <Card.Body>
+              <Card.Title>Your Profile</Card.Title>
+              <Card.Text>
+                <strong>Username:</strong> {username}<br />
+                <strong>Tokens:</strong> {tokens}<br />
+                <strong>Quiz Attempts:</strong> {quizAttempts?.length || 0}
+              </Card.Text>
+              <Link to="/profile">
+                <Button variant="primary">View Profile</Button>
+              </Link>
             </Card.Body>
           </Card>
         </Col>
-      </Row>
-      
-      {/* Quick Actions */}
-      <Row className="mb-4">
-        <Col>
+        
+        <Col md={8}>
+          <Card className="mb-4">
+            <Card.Body>
+              <Card.Title>Available Quizzes</Card.Title>
+              {quizzes.length > 0 ? (
+                <ul className="list-group">
+                  {quizzes.map((quiz, index) => (
+                    <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                      {quiz.name || 'Unnamed Quiz'}
+                      <Link to={`/quiz/${quiz.subject}/${quiz.name}`}>
+                        <Button variant="outline-primary" size="sm">Take Quiz</Button>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <Alert variant="info">No quizzes available at the moment.</Alert>
+              )}
+            </Card.Body>
+          </Card>
+          
           <Card>
             <Card.Body>
-              <h5 className="mb-3">Quick Actions</h5>
-              <div className="d-flex flex-wrap gap-2">
-                <Button as={Link} to="/purchase-tokens" variant="success">
-                  <i className="fas fa-coins me-2"></i>
-                  Buy Tokens
-                </Button>
-                <Button as={Link} to="/profile" variant="info">
-                  <i className="fas fa-user me-2"></i>
-                  View Profile
-                </Button>
-              </div>
+              <Card.Title>Recent Quiz Attempts</Card.Title>
+              {recentAttempts.length > 0 ? (
+                <ul className="list-group">
+                  {recentAttempts.map((attempt, index) => (
+                    <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                      {attempt.quiz_name || 'Unnamed Quiz'}
+                      <span>
+                        Score: {attempt.score}/{attempt.total_questions} 
+                        ({Math.round((attempt.score / attempt.total_questions) * 100)}%)
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <Alert variant="info">You haven't attempted any quizzes yet.</Alert>
+              )}
+              {quizAttempts?.length > 5 && (
+                <div className="mt-3 text-center">
+                  <Link to="/attempts">
+                    <Button variant="outline-secondary">View All Attempts</Button>
+                  </Link>
+                </div>
+              )}
             </Card.Body>
           </Card>
-        </Col>
-      </Row>
-      
-      {/* Available Subjects */}
-      <Row className="mb-4">
-        <Col>
-          <h2 className="mb-3">Available Subjects</h2>
-          {loading ? (
-            <p>Loading subjects...</p>
-          ) : subjects.length > 0 ? (
-            <Row>
-              {subjects.map((subject, index) => (
-                <Col key={index} md={4} className="mb-3">
-                  <Card className="h-100 quiz-card">
-                    <Card.Body>
-                      <Card.Title>{subject}</Card.Title>
-                      <Card.Text>
-                        Explore quizzes related to {subject}
-                      </Card.Text>
-                      <Button 
-                        as={Link} 
-                        to={`/quizzes/${subject}`} 
-                        variant="primary"
-                      >
-                        View Quizzes
-                      </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          ) : (
-            <p>No subjects available. Try generating a quiz!</p>
-          )}
-        </Col>
-      </Row>
-      
-      {/* Recent Attempts */}
-      <Row>
-        <Col>
-          <h2 className="mb-3">Recent Quiz Attempts</h2>
-          {loading ? (
-            <p>Loading attempts...</p>
-          ) : recentAttempts.length > 0 ? (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Subject</th>
-                    <th>Quiz</th>
-                    <th>Score</th>
-                    <th>Date</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentAttempts.map((attempt, index) => (
-                    <tr key={index}>
-                      <td>{attempt.subject}</td>
-                      <td>{attempt.quiz_name}</td>
-                      <td>
-                        <Badge bg={attempt.percentage >= 70 ? 'success' : attempt.percentage >= 40 ? 'warning' : 'danger'}>
-                          {attempt.score}/{attempt.total_questions} ({attempt.percentage.toFixed(1)}%)
-                        </Badge>
-                      </td>
-                      <td>{new Date(attempt.attempt_date).toLocaleDateString()}</td>
-                      <td>
-                        <Button 
-                          as={Link} 
-                          to={`/results/${attempt.subject}/${attempt.quiz_name}`} 
-                          variant="outline-primary" 
-                          size="sm"
-                        >
-                          View Results
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p>No quiz attempts yet. Start taking quizzes to see your results here!</p>
-          )}
-          
-          {totalAttempts > 5 && (
-            <div className="text-center mt-3">
-              <Button as={Link} to="/profile" variant="outline-primary">
-                View All Attempts
-              </Button>
-            </div>
-          )}
         </Col>
       </Row>
     </Container>
