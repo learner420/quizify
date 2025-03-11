@@ -24,7 +24,7 @@ const Dashboard = () => {
         
         // Fetch user's quiz attempts
         const attemptsResponse = await axios.get('/api/quizzes/attempts');
-        setAttempts(attemptsResponse.data.attempts);
+        setAttempts(attemptsResponse.data.attempts || []);
         
       } catch (err) {
         setError('Failed to load dashboard data');
