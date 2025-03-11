@@ -20,7 +20,7 @@ const Dashboard = () => {
         
         // Fetch subjects
         const subjectsResponse = await axios.get('/api/quizzes');
-        setSubjects(subjectsResponse.data.subjects);
+        setSubjects(subjectsResponse.data.subjects || []);
         
         // Fetch user's quiz attempts
         const attemptsResponse = await axios.get('/api/quizzes/attempts');
