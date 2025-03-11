@@ -43,38 +43,38 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login function
-  const login = async (username, password) => {
-    try {
-      setLoading(true);
-      console.log('Attempting login...');
-      
-      // Use the apiCall helper with POST method
-      const response = await apiCall('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      
-      console.log('Login response:', response);
-      
-      if (response && response.success) {
-        setIsAuthenticated(true);
-        setUser(response.user);
-        return { success: true };
-      } else {
-        setError(response.message || 'Login failed');
-        return { success: false, message: response.message };
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('Login failed. Please check your credentials and try again.');
-      return { success: false, message: 'Login failed. Please try again.' };
-    } finally {
-      setLoading(false);
+ const login = async (email, password) => {
+  try {
+    setLoading(true);
+    console.log('Attempting login...');
+    
+    const response = await apiCall('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    
+    console.log('Login response:', response);
+    
+    if (response && response.message === 'Login successful') {
+      setIsAuthenticated(true);
+      setUser(response.user);
+      setError(null);
+      return { success: true };
+    } else {
+      setError(response.error || 'Login failed');
+      return { success: false, message: response.error };
     }
-  };
+  } catch (err) {
+    console.error('Login error:', err);
+    setError('Login failed. Please check your credentials and try again.');
+    return { success: false, message: 'Login failed. Please try again.' };
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Logout function
   const logout = async () => {
