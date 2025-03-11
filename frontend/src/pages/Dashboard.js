@@ -44,7 +44,7 @@ const Dashboard = () => {
     : 0;
   
   // Get recent attempts (last 5)
-  const recentAttempts = attempts.slice(0, 5);
+  const recentAttempts = Array.isArray(attempts) ? attempts.slice(0, 5) : [];
 
   return (
     <Container>
